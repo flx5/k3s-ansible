@@ -1,0 +1,16 @@
+---
+- name: Shutdown cluster servers
+  hosts: server
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Shutdown
+      community.general.shutdown:
+
+- name: Shutdown cluster agents
+  hosts: agent
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Shutdown
+      community.general.shutdown:

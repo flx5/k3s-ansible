@@ -17,6 +17,17 @@
     loop_var: cgroup_item
   notify: Reboot Pi
 
+- name: Fix Network Interface
+  notify: Reboot Pi
+  ansible.builtin.copy:
+     force: false
+     content: |
+        [Match]
+        Driver=smsc95xx
+        [Link]
+        Name=enp1s0
+     dest: /etc/systemd/network/10-enp1s0.link
+
 - name: Gather the package facts
   ansible.builtin.package_facts:
     manager: auto
