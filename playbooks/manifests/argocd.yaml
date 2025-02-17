@@ -15,7 +15,7 @@ spec:
   # TODO Set this to internal ingress
   valuesContent: |-
     global:
-      domain: argocd.apps.nue.felix-prasse.de
+      domain: argocd.home.arpa
 
     configs:
       params:

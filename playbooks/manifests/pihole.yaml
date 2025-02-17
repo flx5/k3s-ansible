@@ -13,6 +13,7 @@ spec:
   chart: pihole
   targetNamespace: pihole
   valuesContent: |-
+    virtualHost: pihole.home.arpa
     dnsmasq:
       customDnsEntries:
         - address=/demo/192.168.2.103
