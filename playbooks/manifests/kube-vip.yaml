@@ -98,6 +98,8 @@ spec:
           value: kube-system
         - name: svc_enable
           value: "true"
+        - name: svc_election
+          value: "true"
         - name: svc_leasename
           value: plndr-svcs-lock
         - name: vip_leaderelection
