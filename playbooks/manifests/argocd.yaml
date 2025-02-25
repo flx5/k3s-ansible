@@ -25,3 +25,23 @@ spec:
       ingress:
         enabled: true
         ingressClassName: traefik
+---
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  source:
+    repoURL: https://github.com/flx5/argocd-apps.git
+    targetRevision: HEAD
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
