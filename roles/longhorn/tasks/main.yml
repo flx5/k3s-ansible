@@ -12,11 +12,13 @@
   community.general.modprobe:
     name: dm_crypt
     state: present
+    persistent: present
 
-- name: Ensure dm_crypt module is loaded
+- name: Ensure iscsi_tcp module is loaded
   community.general.modprobe:
-    name: dm_crypt
+    name: iscsi_tcp
     state: present
+    persistent: present
 
 - name: Ensure iscsi daemon is running
   ansible.builtin.systemd_service:
@@ -24,7 +26,7 @@
     name: iscsid
 
 - name: Copy Longhorn Manifest
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: "longhorn.yaml"
     dest: "/var/lib/rancher/k3s/server/manifests/longhorn.yaml"
     mode: "0600"

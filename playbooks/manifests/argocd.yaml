@@ -12,7 +12,7 @@ spec:
   repo: https://argoproj.github.io/argo-helm
   chart: argo-cd
   targetNamespace: argocd
-  # TODO Set this to internal ingress
+  version: 7.8.8
   valuesContent: |-
     global:
       domain: argocd.home.arpa
@@ -24,7 +24,7 @@ spec:
     server:
       ingress:
         enabled: true
-        ingressClassName: traefik
+        ingressClassName: internal-nginx
 ---
 # https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/
 apiVersion: argoproj.io/v1alpha1
