@@ -51,5 +51,5 @@ spec:
         # Set to local to preserve the source ip and reduce the amount of hops (kube-vip should use the leader election to only advertise the nodes that have a pod running)
         externalTrafficPolicy: Local
         annotations: 
-         kube-vip.io/loadbalancerIPs: 192.168.2.92
+         kube-vip.io/loadbalancerIPs: 192.168.2.93
 ---

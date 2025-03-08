@@ -1,3 +1,9 @@
+# IMPORTANT:
+# Never assign the same ip to multiple services.
+# Whilst possible in theory this only works as long as the services are scheduled on the same node.
+# You can debug situations like those by using arping 192.168.2.92 (replace the IP with the problematic one).
+# KubeVIP would happily do this but then create different locks (each service has a unique lock name) and distribute those...
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
