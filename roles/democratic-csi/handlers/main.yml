@@ -1,0 +1,6 @@
+---
+- name: Restart multipath-tools
+  ansible.builtin.systemd_service:
+    state: restarted
+    enabled: true
+    name: multipath-tools

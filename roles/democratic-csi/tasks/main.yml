@@ -1,0 +1,60 @@
+- name: Install democratic-csi Node dependencies
+  ansible.builtin.apt:
+    pkg:
+    - cifs-utils
+    - nfs-common
+    - open-iscsi
+    - lsscsi
+    - sg3-utils
+    - multipath-tools
+    - scsitools
+    - nvme-cli
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Copy multipath.conf
+  ansible.builtin.copy:
+    content: |
+      defaults {
+          user_friendly_names yes
+          find_multipaths yes
+      }
+    dest: "/etc/multipath.conf"
+    mode: "0600"
+  notify: Restart multipath-tools
+
+- name: Ensure multipath-tools daemon is running
+  ansible.builtin.systemd_service:
+    state: started
+    enabled: true
+    name: multipath-tools
+
+- name: Ensure iscsi daemon is running
+  ansible.builtin.systemd_service:
+    state: started
+    enabled: true
+    name: open-iscsi
+
+- name: Ensure nvmeof core module is loaded and configured
+  community.general.modprobe:
+    name: nvme_core
+    state: present
+    persistent: present
+    params: 'multipath=N'
+
+- name: Ensure nvmeof modules are loaded
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+    persistent: present
+  loop:
+    - nvme
+    - nvme-tcp
+    - nvme-fc
+    - nvme-rdma
+
+- name: Copy Democratic-CSI Manifest
+  ansible.builtin.copy:
+    src: "democratic-csi.yaml"
+    dest: "/var/lib/rancher/k3s/server/manifests/democratic-csi.yaml"
+    mode: "0600"
