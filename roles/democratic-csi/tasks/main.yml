@@ -54,7 +54,9 @@
     - nvme-rdma
 
 - name: Copy Democratic-CSI Manifest
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: "democratic-csi.yaml"
     dest: "/var/lib/rancher/k3s/server/manifests/democratic-csi.yaml"
     mode: "0600"
+    variable_start_string: "[%"
+    variable_end_string: "%]"
