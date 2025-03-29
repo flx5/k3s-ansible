@@ -3,6 +3,61 @@ kind: Namespace
 metadata:
   name: ingress-nginx
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-headers
+  namespace: ingress-nginx
+data:
+  X-Frame-Options: "DENY"
+  X-Content-Type-Options: "nosniff"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-error-pages
+  namespace: ingress-nginx
+data:
+  403.html: |
+    <!DOCTYPE html>
+    <html>
+    <head><title>Forbidden</title></head>
+    <body>Forbidden</body>
+    </html>
+  404.html: |
+    <!DOCTYPE html>
+    <html>
+    <head><title>PAGE NOT FOUND</title></head>
+    <body>PAGE NOT FOUND</body>
+    </html>
+  500.html: |
+    <!DOCTYPE html>
+    <html>
+    <head><title>INTERNAL SERVER ERROR</title></head>
+    <body>INTERNAL SERVER ERROR</body>
+    </html>
+  503.html: |
+    <!DOCTYPE html>
+    <html>
+    <head><title>SERVICE UNAVAILABLE</title></head>
+    <body>SERVICE UNAVAILABLE</body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: modsecurity-plugins
+  namespace: ingress-nginx
+data:
+  empty-after.conf: |
+    # no data
+  empty-before.conf: |
+    # no data
+  empty-config.conf: |
+    # no data
+  nextcloud-rule-exclusions-before.conf: |
+    {{ lookup('file', './nextcloud-rule-exclusions-before.conf') | indent(4) }}
+---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
@@ -15,6 +70,12 @@ spec:
   targetNamespace: ingress-nginx
   valuesContent: |-
     controller:
+      add-headers: ingress-nginx/custom-headers
+      config:
+        # In accordance with hardening guide
+        keep-alive: 10
+        custom-http-errors: "403,404,503,500"
+        hide-headers: X-Powered-By,Server
       # Must be the same as for kube vip due to externalTrafficPolicy: Local
       affinity:
         nodeAffinity:
@@ -38,6 +99,19 @@ spec:
         externalTrafficPolicy: Local
         annotations: 
          kube-vip.io/loadbalancerIPs: 192.168.2.91
+    defaultBackend:
+      enabled: true
+      image:
+        registry: registry.k8s.io
+        image: ingress-nginx/custom-error-pages
+        tag: v1.1.2@sha256:49a5154b3f918aae436ae342ac410a947524f1da8a2f9c249b564a092cf44955
+      extraVolumes:
+      - name: custom-error-pages
+        configMap:
+          name: custom-error-pages
+      extraVolumeMounts:
+        - name: custom-error-pages
+          mountPath: /www
 ---
 # TODO https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/modsecurity/
 apiVersion: helm.cattle.io/v1
@@ -52,6 +126,57 @@ spec:
   targetNamespace: ingress-nginx
   valuesContent: |-
     controller:
+      add-headers: ingress-nginx/custom-headers
+      config:
+        # In accordance with hardening guide
+        keep-alive: 10
+        custom-http-errors: "403,404,503,500"
+        hide-headers: X-Powered-By,Server
+        # Needed to allow snippets
+        # allow-snippet-annotations: true
+        # annotations-risk-level: Critical
+        # WAF
+        # Enables Modsecurity
+        enable-modsecurity: "true"
+        # Update ModSecurity config and rules
+        modsecurity-snippet: |
+          # this enables the mod security nextcloud plugin
+          Include /etc/nginx/owasp-modsecurity-crs/plugins/nextcloud-rule-exclusions-before.conf
+
+          # this enables the default OWASP Core Rule Set
+          Include /etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf
+    
+          # Enable prevention mode. Options: DetectionOnly,On,Off (default is DetectionOnly)
+          SecRuleEngine On
+    
+          # Enable scanning of the request body
+          SecRequestBodyAccess On
+    
+          # Enable XML and JSON parsing
+          SecRule REQUEST_HEADERS:Content-Type "(?:text|application(?:/soap\+|/)|application/xml)/" \
+            "id:200000,phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML"
+    
+          SecRule REQUEST_HEADERS:Content-Type "application/json" \
+            "id:200001,phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
+    
+          # Reject if larger (we could also let it pass with ProcessPartial)
+          SecRequestBodyLimitAction Reject
+    
+          # Send ModSecurity audit logs to the stdout (only for rejected requests)
+          SecAuditLog /dev/stdout
+    
+          # format the logs in JSON
+          SecAuditLogFormat JSON
+    
+          # could be On/Off/RelevantOnly
+          SecAuditEngine RelevantOnly
+      extraVolumes:
+      - name: plugins
+        configMap:
+          name: modsecurity-plugins
+      extraVolumeMounts:
+      - name: plugins
+        mountPath: /etc/nginx/owasp-modsecurity-crs/plugins
       # Must be the same as for kube vip due to externalTrafficPolicy: Local
       affinity:
         nodeAffinity:
@@ -75,4 +200,17 @@ spec:
         externalTrafficPolicy: Local
         annotations: 
          kube-vip.io/loadbalancerIPs: 192.168.2.93
+    defaultBackend:
+      enabled: true
+      image:
+        registry: registry.k8s.io
+        image: ingress-nginx/custom-error-pages
+        tag: v1.1.2@sha256:49a5154b3f918aae436ae342ac410a947524f1da8a2f9c249b564a092cf44955
+      extraVolumes:
+      - name: custom-error-pages
+        configMap:
+          name: custom-error-pages
+      extraVolumeMounts:
+        - name: custom-error-pages
+          mountPath: /www
 ---

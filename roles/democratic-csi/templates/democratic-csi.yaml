@@ -68,7 +68,8 @@ spec:
           host: 192.168.2.20
           port: 22
           username: democratic-csi
-          privateKey: [% democratic_csi_ssh %]
+          privateKey: |
+            [% democratic_csi_ssh | indent(12) %]
         
         zfs:
           # can be used to override defaults if necessary
