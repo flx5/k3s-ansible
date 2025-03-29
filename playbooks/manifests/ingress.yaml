@@ -219,7 +219,10 @@ metadata:
   name: ingress-network-policy
   namespace: ingress-nginx
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/name: ingress-nginx
   policyTypes:
     - Ingress
     - Egress
@@ -232,3 +235,25 @@ spec:
     - to:
         # Allow egress to all namespaces but not to lan
         - namespaceSelector: {}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-webhook-access-from-apiserver
+  namespace: ingress-nginx
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/name: ingress-nginx
+  ingress:
+    - from:
+        # Admission Webhooks are called from the Kube-API Server.
+        # This is using the flannel.1 interface of the controller servers.
+        # Flannel is assigning each controller server it's own subnet.
+        {% for subnet in range(256) -%}
+        - ipBlock:
+            cidr: 10.42.{{ subnet }}.0/32
+        {% endfor +%}
+      ports:
+        - port: 8443
