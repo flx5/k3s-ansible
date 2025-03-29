@@ -20,25 +20,25 @@ metadata:
 data:
   403.html: |
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head><title>Forbidden</title></head>
     <body>Forbidden</body>
     </html>
   404.html: |
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head><title>PAGE NOT FOUND</title></head>
     <body>PAGE NOT FOUND</body>
     </html>
   500.html: |
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head><title>INTERNAL SERVER ERROR</title></head>
     <body>INTERNAL SERVER ERROR</body>
     </html>
   503.html: |
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head><title>SERVICE UNAVAILABLE</title></head>
     <body>SERVICE UNAVAILABLE</body>
     </html>
@@ -113,7 +113,6 @@ spec:
         - name: custom-error-pages
           mountPath: /www
 ---
-# TODO https://kubernetes.github.io/ingress-nginx/user-guide/third-party-addons/modsecurity/
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
@@ -214,3 +213,22 @@ spec:
         - name: custom-error-pages
           mountPath: /www
 ---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-network-policy
+  namespace: ingress-nginx
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - ipBlock:
+            # Only allow ingress from lan
+            cidr: 192.168.0.0/16
+  egress:
+    - to:
+        # Allow egress to all namespaces but not to lan
+        - namespaceSelector: {}
