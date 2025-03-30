@@ -235,6 +235,19 @@ spec:
     - to:
         # Allow egress to all namespaces but not to lan
         - namespaceSelector: {}
+    # Need to allow access to the API server for for controller-leader-lease
+    # Allow egress to the service first (kubectl get svc kubernetes).
+    # Then we also need to allow egress to the actual controller nodes:
+    # https://pauldally.medium.com/accessing-kubernetes-api-server-when-there-is-an-egress-networkpolicy-af4435e005f9
+    # Would be nicer if we would use cilium: https://docs.cilium.io/en/stable/security/policy/language/#entities-based
+    - to:
+        - ipBlock:
+
+            cidr: 10.43.0.1/32
+        {% for server in groups['server'] -%}
+        - ipBlock:
+            cidr: {{ server }}/32
+        {% endfor +%}
 ---
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
@@ -246,6 +259,8 @@ spec:
     matchLabels:
       app.kubernetes.io/component: controller
       app.kubernetes.io/name: ingress-nginx
+  policyTypes:
+    - Ingress
   ingress:
     - from:
         # Admission Webhooks are called from the Kube-API Server.
