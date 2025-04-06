@@ -1,0 +1,11 @@
+# TODO Since we can customize this coredns instance it might be possible to use external-dns here directly.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  home.arpa.server: |
+    home.arpa felix-prasse.de {
+      forward . 192.168.2.92:53
+    }
