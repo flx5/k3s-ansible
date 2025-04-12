@@ -1,0 +1,100 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  annotations:
+    helmcharts.cattle.io/managed-by: helm-controller
+  finalizers:
+    - wrangler.cattle.io/on-helm-chart-remove
+  name: democratic-csi-local
+  namespace: kube-system
+spec:
+  repo: https://democratic-csi.github.io/charts/
+  chart: democratic-csi
+  version: 0.15.0
+  targetNamespace: democratic-csi
+  failurePolicy: abort
+  createNamespace: true
+  valuesContent: |
+    node:
+      nodeSelector:
+        kubernetes.io/hostname: nas
+    
+    # driver only works with 1.16+
+    csiDriver:
+      # should be globally unique for a given cluster
+      name: "org.democratic-csi.zfs-local-zvol"
+      attachRequired: false
+      storageCapacity: true
+      fsGroupPolicy: File
+    
+    storageClasses:
+      - name: zfs-local-zvol
+        defaultClass: false
+        reclaimPolicy: Delete
+        volumeBindingMode: WaitForFirstConsumer
+        # distributed support is not yet ready for expansion
+        allowVolumeExpansion: false
+        parameters:
+          fsType: xfs
+    
+        mountOptions:
+          - noatime
+        secrets:
+          provisioner-secret:
+          controller-publish-secret:
+          node-stage-secret:
+          node-publish-secret:
+          controller-expand-secret:
+    
+    # if your cluster supports snapshots you may enable below
+    volumeSnapshotClasses: []
+    #- name: zfs-local-zvol
+    #  secrets:
+    #    snapshotter-secret:
+    
+    controller:
+      enabled: true
+      strategy: node
+    
+      externalProvisioner:
+        extraArgs:
+          - --leader-election=false
+          - --node-deployment=true
+          - --node-deployment-immediate-binding=false
+          - --feature-gates=Topology=true
+          - --strict-topology=true
+          - --enable-capacity=true
+          - --capacity-ownerref-level=1
+    
+      externalAttacher:
+        enabled: false
+    
+      # distributed support is not yet ready
+      externalResizer:
+        enabled: false
+    
+      externalSnapshotter:
+        enabled: true
+        extraArgs:
+          - --leader-election=false
+          - --node-deployment=true
+    
+    driver:
+      config:
+        # please see the most up-to-date example of the corresponding config here:
+        # https://github.com/democratic-csi/democratic-csi/tree/master/examples
+        # YOU MUST COPY THE DATA HERE INLINE!
+        driver: zfs-local-zvol
+    
+        zfs:
+          datasetParentName: pool1/k8s/local/v
+          detachedSnapshotsDatasetParentName: pool1/k8s/local/s
+        
+          datasetProperties:
+          # key: value
+        
+          zvolCompression:
+          zvolDedup:
+          zvolEnableReservation: false
+          zvolBlocksize:
+        #...

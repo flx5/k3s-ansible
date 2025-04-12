@@ -229,11 +229,12 @@ spec:
   ingress:
     - from:
         - ipBlock:
-            # Only allow ingress from lan
+            # Allow ingress from lan
             cidr: 192.168.0.0/16
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: velero
+        - ipBlock:
+            # Allow ingress from vpn
+            cidr: 10.10.10.0/24
+
   egress:
     - to:
         # Allow egress to all namespaces but not to lan

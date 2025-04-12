@@ -53,10 +53,18 @@
     - nvme-fc
     - nvme-rdma
 
-- name: Copy Democratic-CSI Manifest
+- name: Copy Democratic-CSI NFS Manifest
   ansible.builtin.template:
     src: "democratic-csi.yaml"
     dest: "/var/lib/rancher/k3s/server/manifests/democratic-csi.yaml"
+    mode: "0600"
+    variable_start_string: "[%"
+    variable_end_string: "%]"
+
+- name: Copy Democratic-CSI Local Manifest
+  ansible.builtin.template:
+    src: "democratic-csi-zfs-local.yaml"
+    dest: "/var/lib/rancher/k3s/server/manifests/democratic-csi-zfs-local.yaml"
     mode: "0600"
     variable_start_string: "[%"
     variable_end_string: "%]"

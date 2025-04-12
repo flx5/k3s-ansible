@@ -14,6 +14,23 @@ spec:
   targetNamespace: longhorn-system
   failurePolicy: abort
   createNamespace: true
+  valuesContent: |
+    # -- Annotation for the Longhorn Manager DaemonSet pods. This setting is optional.
+    annotations:
+       # Actually this needs to be applied to the instance manager and not the longhorn-manager...
+       # Limit Networkspeeds so that replication and backups don't kill the network
+       # See also https://github.com/longhorn/longhorn/issues/5692
+       kubernetes.io/ingress-bandwidth: 500M
+       kubernetes.io/egress-bandwidth: 250M
+    
+    defaultBackupStore:
+      # -- Endpoint used to access the default backupstore.
+      backupTarget: s3://longhorn@s3.nue.felix-prasse.de/default/
+      # -- Name of the Kubernetes secret associated with the default backup target.
+      backupTargetCredentialSecret: "s3-nue-secret"
+      # -- Number of seconds that Longhorn waits before checking the default backupstore for new backups.
+      pollInterval: 300
+
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -60,6 +77,16 @@ stringData:
   CRYPTO_KEY_HASH: "sha256"
   CRYPTO_KEY_SIZE: "256"
   CRYPTO_PBKDF: "argon2i"
+---
+apiVersion: v1
+data:
+  AWS_ACCESS_KEY_ID: "{{AWS_ACCESS_KEY_ID}}"
+  AWS_SECRET_ACCESS_KEY: "{{AWS_SECRET_ACCESS_KEY}}"
+  AWS_ENDPOINTS: "{{AWS_ENDPOINTS}}"
+kind: Secret
+metadata:
+  name: s3-nue-secret
+  namespace: longhorn-system
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
