@@ -19,6 +19,12 @@
           user_friendly_names yes
           find_multipaths yes
       }
+      
+      # See https://longhorn.io/kb/troubleshooting-volume-with-multipath/
+      blacklist {
+          devnode "^sd[a-z0-9]+"
+      }
+
     dest: "/etc/multipath.conf"
     mode: "0600"
   notify: Restart multipath-tools

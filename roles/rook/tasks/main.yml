@@ -1,0 +1,28 @@
+- name: Install Rook Dependencies
+  ansible.builtin.apt:
+    pkg:
+    - lvm2
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure rbd module is available
+  community.general.modprobe:
+    name: rbd
+    state: present
+
+- name: Ensure Backports is enabled for newer kernel... (CephFs needs Kernel 6.6 for fscrypt)
+  ansible.builtin.apt_repository:
+    repo: "deb http://deb.debian.org/debian {{ ansible_distribution_release }}-backports main contrib"
+    state: present
+
+- name: Update Cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install newer kernel (Kernel 6.6 required for fscrypt)
+  ansible.builtin.apt:
+    pkg:
+      - "linux-image-{{ [ansible_architecture] | map('extract', deb_architecture) | first }}>=6.6"
+    state: present
+    default_release: "{{ ansible_distribution_release }}-backports"

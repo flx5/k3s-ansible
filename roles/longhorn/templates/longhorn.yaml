@@ -157,8 +157,10 @@ reclaimPolicy: Retain
 mountOptions:
   - discard
 parameters:
-  # TODO
-  numberOfReplicas: "1"
+  # TODO This doesn't work for large replicas...
+  # See https://github.com/longhorn/longhorn/issues/9626
+  # Even with very limited bandwidth the fujitsu s920 nodes run into high cpu problems resulting in connection resets.
+  numberOfReplicas: "3"
   staleReplicaTimeout: "2880" # 48 hours in minutes
   fromBackup: ""
   fsType: "ext4"

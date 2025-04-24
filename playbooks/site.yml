@@ -15,6 +15,7 @@
     - role: k3s_server
     - role: longhorn
     - role: democratic-csi
+    - role: rook
 
 - name: Setup K3S agent
   hosts: agent
@@ -23,3 +24,4 @@
     - role: k3s_agent
     - role: longhorn
     - role: democratic-csi
+    - role: rook
