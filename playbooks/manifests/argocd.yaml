@@ -24,6 +24,8 @@ spec:
         # -- The name of tracking label used by Argo CD for resource pruning
         # Use another name here because of https://github.com/vmware-tanzu/velero/issues/7905
         application.instanceLabelKey: argocd.argoproj.io/instance
+        application.resourceTrackingMethod: annotation+label
+
 
     server:
       ingress:
