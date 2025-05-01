@@ -13,7 +13,6 @@
   become: true
   roles:
     - role: k3s_server
-    - role: longhorn
     - role: democratic-csi
     - role: rook
 
@@ -22,6 +21,5 @@
   become: true
   roles:
     - role: k3s_agent
-    - role: longhorn
     - role: democratic-csi
     - role: rook
