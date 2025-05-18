@@ -42,7 +42,7 @@ spec:
   project: default
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: true
   source:
     repoURL: https://github.com/flx5/argocd-apps.git
