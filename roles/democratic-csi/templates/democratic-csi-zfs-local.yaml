@@ -18,22 +18,20 @@ spec:
     node:
       nodeSelector:
         kubernetes.io/hostname: nas
-    
     # driver only works with 1.16+
     csiDriver:
       # should be globally unique for a given cluster
-      name: "org.democratic-csi.zfs-local-zvol"
+      name: "org.democratic-csi.zfs-local-nas-ssd"
       attachRequired: false
       storageCapacity: true
       fsGroupPolicy: File
     
     storageClasses:
-      - name: zfs-local-zvol
+      - name: zfs-local-nas-ssd
         defaultClass: false
         reclaimPolicy: Delete
         volumeBindingMode: WaitForFirstConsumer
-        # distributed support is not yet ready for expansion
-        allowVolumeExpansion: false
+        allowVolumeExpansion: true
         parameters:
           fsType: xfs
     
@@ -48,7 +46,7 @@ spec:
     
     # if your cluster supports snapshots you may enable below
     volumeSnapshotClasses: []
-    #- name: zfs-local-zvol
+    #- name: zfs-local-nas-ssd
     #  secrets:
     #    snapshotter-secret:
     
@@ -78,7 +76,6 @@ spec:
         extraArgs:
           - --leader-election=false
           - --node-deployment=true
-    
     driver:
       config:
         # please see the most up-to-date example of the corresponding config here:
@@ -87,12 +84,12 @@ spec:
         driver: zfs-local-zvol
     
         zfs:
-          datasetParentName: pool1/k8s/local/v
-          detachedSnapshotsDatasetParentName: pool1/k8s/local/s
-        
+          datasetParentName: pool2/k8s/encrypted/volume
+          detachedSnapshotsDatasetParentName: pool2/k8s/encrypted/snapshot
+    
           datasetProperties:
           # key: value
-        
+    
           zvolCompression:
           zvolDedup:
           zvolEnableReservation: false
