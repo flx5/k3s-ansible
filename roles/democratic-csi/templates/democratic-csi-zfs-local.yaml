@@ -45,10 +45,14 @@ spec:
           controller-expand-secret:
     
     # if your cluster supports snapshots you may enable below
-    volumeSnapshotClasses: []
-    #- name: zfs-local-nas-ssd
-    #  secrets:
-    #    snapshotter-secret:
+    volumeSnapshotClasses:
+    - name: zfs-local-nas-ssd
+      labels:
+        velero.io/csi-volumesnapshot-class: "true"
+      annotations:
+        snapshot.storage.kubernetes.io/is-default-class: "true"
+      secrets:
+        snapshotter-secret:
     
     controller:
       enabled: true
