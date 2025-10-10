@@ -57,6 +57,8 @@ data:
     # no data
   nextcloud-rule-exclusions-before.conf: |
     {{ lookup('file', './nextcloud-rule-exclusions-before.conf') | indent(4) }}
+  immich-rule-exclusions-before.conf: |
+    {{ lookup('file', './immich-rule-exclusions-before.conf') | indent(4) }}
 ---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
@@ -141,6 +143,7 @@ spec:
         modsecurity-snippet: |
           # this enables the mod security nextcloud plugin
           Include /etc/nginx/owasp-modsecurity-crs/plugins/nextcloud-rule-exclusions-before.conf
+          Include /etc/nginx/owasp-modsecurity-crs/plugins/immich-rule-exclusions-before.conf
 
           # this enables the default OWASP Core Rule Set
           Include /etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf
@@ -161,6 +164,9 @@ spec:
           # Reject if larger (we could also let it pass with ProcessPartial)
           SecRequestBodyLimitAction Reject
     
+          SecDebugLog /dev/stdout
+          # SecDebugLogLevel 4
+
           # Send ModSecurity audit logs to the stdout (only for rejected requests)
           SecAuditLog /dev/stdout
     
