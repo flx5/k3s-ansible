@@ -142,6 +142,7 @@ spec:
         # Update ModSecurity config and rules
         modsecurity-snippet: |
           # this enables the mod security nextcloud plugin
+          # TODO These rule should only apply to the ingresses of these apps. This is now applied to everything!
           Include /etc/nginx/owasp-modsecurity-crs/plugins/nextcloud-rule-exclusions-before.conf
           Include /etc/nginx/owasp-modsecurity-crs/plugins/immich-rule-exclusions-before.conf
 
