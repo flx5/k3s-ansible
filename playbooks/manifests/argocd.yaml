@@ -25,6 +25,11 @@ spec:
         # Use another name here because of https://github.com/vmware-tanzu/velero/issues/7905
         application.instanceLabelKey: argocd.argoproj.io/instance
         application.resourceTrackingMethod: annotation+label
+    
+        resource.compareoptions: |
+          # disables status field diffing in specified resource types
+          # https://kyverno.io/docs/installation/platform-notes/#notes-for-argocd-users
+          ignoreAggregatedRoles: true
 
 
     server:
