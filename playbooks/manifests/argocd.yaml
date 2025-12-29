@@ -35,7 +35,7 @@ spec:
     server:
       ingress:
         enabled: true
-        ingressClassName: internal-nginx
+        ingressClassName: traefik-internal
 ---
 # https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/
 apiVersion: argoproj.io/v1alpha1
