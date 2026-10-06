@@ -12,7 +12,7 @@ spec:
   repo: https://argoproj.github.io/argo-helm
   chart: argo-cd
   targetNamespace: argocd
-  version: 7.8.8
+  version: 10.9.6
   valuesContent: |-
     global:
       domain: argocd.home.arpa
@@ -20,17 +20,6 @@ spec:
     configs:
       params:
         server.insecure: true
-      cm:
-        # -- The name of tracking label used by Argo CD for resource pruning
-        # Use another name here because of https://github.com/vmware-tanzu/velero/issues/7905
-        application.instanceLabelKey: argocd.argoproj.io/instance
-        application.resourceTrackingMethod: annotation+label
-    
-        resource.compareoptions: |
-          # disables status field diffing in specified resource types
-          # https://kyverno.io/docs/installation/platform-notes/#notes-for-argocd-users
-          ignoreAggregatedRoles: true
-
 
     server:
       ingress:
