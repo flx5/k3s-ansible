@@ -2,6 +2,7 @@
   ansible.builtin.apt:
     pkg:
     - lvm2
+    - systemd-cryptsetup # required on trixie to load luks encrypted disk on startup
     update_cache: true
     cache_valid_time: 3600
 
