@@ -33,7 +33,7 @@
   ansible.builtin.systemd_service:
     state: started
     enabled: true
-    name: multipath-tools
+    name: multipathd
 
 - name: Ensure iscsi daemon is running
   ansible.builtin.systemd_service:
