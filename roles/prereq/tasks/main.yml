@@ -238,6 +238,11 @@
         dest: "/var/lib/rancher/k3s/server/manifests"
         mode: "0600"
       loop: "{{ extra_manifests }}"
+    - name: Remove manifests
+      ansible.builtin.file:
+        path: "/var/lib/rancher/k3s/server/manifests/{{ item }}"
+        state: absent
+      loop: "{{ remove_manifests }}"
 
 - name: Setup optional private registry configuration
   when: registries_config_yaml is defined
